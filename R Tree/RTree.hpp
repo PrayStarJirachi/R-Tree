@@ -6,11 +6,11 @@
 
 namespace sjtu{
 
-template<size_t M, size_t C>
+template<size_t M, size_t D>
 class RTree{
 private:
 	RTreeNode *root;
-
+	RTreeNode* Find_Leaf(HyperPoint *p, RTreeNode *t);
 public:
 	RTree();
 	bool insert(const HyperPoint<M> &rhs);
