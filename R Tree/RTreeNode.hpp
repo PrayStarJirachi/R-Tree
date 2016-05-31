@@ -11,6 +11,8 @@ class RTreeNode{
 friend class RTree<M, C>;
 private:
 	RTreeNode *child[C], father;
+	size_t level;
+
 };
 
 #include "Source/RTreeNode.cpp"
