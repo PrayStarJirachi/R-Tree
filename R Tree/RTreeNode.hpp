@@ -3,14 +3,16 @@
 
 namespace sjtu{
 
-template<class M, class C>
+template<class M, class D>
 class RTree;
 
-template<class M, class C>
+template<class M, class D>
 class RTreeNode{
-friend class RTree<M, C>;
+friend class RTree<M, D>;
 private:
-	RTreeNode *child[C], father;
+	void *child[M];
+	RTreeNode *father;
+	HyperRectangle box[D];
 	size_t level;
 
 };
