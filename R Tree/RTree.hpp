@@ -24,9 +24,70 @@ public:
 }
 
 template<class T, size_t M, size_t D>
-void RTree<T, M, D>::insert(const HyperBound<D> &key, const T &value) {
-	RTreeNode u = root;
+RTreeNode<M, D>* RTree<T, M, D>::splitNode(RTreeNode<M, D>* u) {
 	
+}
+
+template<class T, size_t M, size_t D>
+void RTree<T, M, D>::chooseLeaf(const HyperBound<D> &key, const T &value) {
+	RTreeNode<M, D> *u = root;
+	while (true) {
+		if (u->level == 0) {
+			return u;
+		}
+		RTreeNode *v;
+		double max = -DBL_MAX;
+		for (int i = 0; i < u->size; i ++) {
+			double s = (*u->child[i]->box + key).area();
+			if (s > max) {
+				max = s;
+				v = u->child[i];
+			}
+		}
+		u = v;
+	}
+}
+
+template<class T, size_t M, size_t D>
+void RTree<T, M, D>::adjust(RTreeNode<M, D> *u, RTreeNode<M, D> *brother) {
+	if (u == root) {
+		if (brother != nullptr) {
+			root = new RTreeNode();
+			root->child[root->size ++] = u;
+			root->child[root->size ++] = brother;
+			u->father = root;
+			brother->father = root;
+		}
+		return ;
+	}
+	
+	RTreeNode<M, D> *father = u->father;
+	if (brother != nullptr) {
+		father->child[father->size ++] = brother;
+	}
+	father->box = HyperBound();
+	for (int i = 0; i < father->size; i ++) {
+		father->box += father->child[i]->box;
+	}
+	
+	RTreeNode<M, D> *v;
+	if (father->size > M) {
+		v = splitNode(father);
+	}
+	adjust(father, v);
+}
+
+template<class T, size_t M, size_t D>
+void RTree<T, M, D>::insert(const HyperBound<D> &key, const T &value) {
+	RTreeNode<M, D> *target = chooseLeaf(key, value);
+	
+	target->child[target->size ++] = new std::pair(key, value);
+	
+	RTreeNode<M, D> *v;
+	if (target->size > M) {
+		v = splitNode(target);
+	}
+	adjust(target, v);
 }
 
 #endif
