@@ -25,7 +25,14 @@ public:
 
 template<class T, size_t M, size_t D>
 RTreeNode<M, D>* RTree<T, M, D>::splitNode(RTreeNode<M, D>* u) {
+	RTreeNode *tmp[2];
+	tmp[0] = new RTreeNode<M, D>(*u);
+	tmp[1] = new RTreeNode<M, D>(*u);
+	pickSeeds(u, tmp[0], tmp[1]);
 	
+	for (int i = 0; i < u->size; i ++) {
+		
+	}
 }
 
 template<class T, size_t M, size_t D>
@@ -55,6 +62,7 @@ void RTree<T, M, D>::adjust(RTreeNode<M, D> *u, RTreeNode<M, D> *brother) {
 			root = new RTreeNode();
 			root->child[root->size ++] = u;
 			root->child[root->size ++] = brother;
+			root->level = u->level + 1;
 			u->father = root;
 			brother->father = root;
 		}
@@ -64,6 +72,7 @@ void RTree<T, M, D>::adjust(RTreeNode<M, D> *u, RTreeNode<M, D> *brother) {
 	RTreeNode<M, D> *father = u->father;
 	if (brother != nullptr) {
 		father->child[father->size ++] = brother;
+		brother.father = father;
 	}
 	father->box = HyperBound();
 	for (int i = 0; i < father->size; i ++) {
