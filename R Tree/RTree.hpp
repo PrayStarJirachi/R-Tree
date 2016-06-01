@@ -28,6 +28,8 @@ RTreeNode<M, D>* RTree<T, M, D>::splitNode(RTreeNode<M, D>* u) {
 	RTreeNode *tmp[2];
 	tmp[0] = new RTreeNode<M, D>(*u);
 	tmp[1] = new RTreeNode<M, D>(*u);
+	tmp[0]->size = 0;
+	tmp[1]->size = 0;
 	pickSeeds(u, tmp[0], tmp[1]);
 	
 	while (u->size > 0) {
@@ -47,6 +49,46 @@ RTreeNode<M, D>* RTree<T, M, D>::splitNode(RTreeNode<M, D>* u) {
 }
 
 template<class T, size_t M, size_t D>
+void pickSeeds(RTreeNode<M, D> *u, RTreeNode<M, D> *t0, RTreeNode<M, D> *t1) {
+	std::pair<int, int> tmp = std::make_pair(-1, -1);
+	double max = -1;
+	for (int i = 0; i < u->size; i ++) {
+		for (int j = i + 1; j < u->size; j ++) {
+			if (std::abs(u->child[i]->box.area() - u->child[j]->box.area()) > max) {
+				max = std::abs(u->child[i]->box.area() - u->child[j]->box.area());
+				tmp = std::make_pair(i, j);
+			}
+		}
+	}
+	t0->append(u->child[i]);
+	t1->append(u->child[j]);
+	u->erase(u->child[i]);
+	u->erase(u->child[j]);
+}
+
+template<class T, size_t M, size_t D>
+void pickNext(RTreeNode<M, D> *u, RTreeNode<M, D> *t0, RTreeNode<M, D> *t1) {
+	t0->update();
+	t1->update();
+	
+	std::pair<int, RTreeNode<M, D>> best;
+	int max = -1;
+	for (int i = 0; i < u->size(); i ++) {
+		double delta[2];
+		delta[0] = (t0->box + u->child[i]->box).area() - t0->box.area();
+		delta[1] = (t1->box + u->child[i]->box).area() - t1->box.area();
+		if (delta[0] > max) {
+			max = delta[0];
+			best = std::make_pair(i, t0);
+		}
+		if (delta[1] > max) {
+			max = delta[1];
+			best = std::make_pair(i, t1);
+		}
+	}
+	best.second->append(u->child[best.first]);
+	u->erase(u->child[best.first]);
+}
 
 template<class T, size_t M, size_t D>
 void RTree<T, M, D>::chooseLeaf(const HyperBound<D> &key, const T &value) {
@@ -73,19 +115,16 @@ void RTree<T, M, D>::adjust(RTreeNode<M, D> *u, RTreeNode<M, D> *brother) {
 	if (u == root) {
 		if (brother != nullptr) {
 			root = new RTreeNode();
-			root->child[root->size ++] = u;
-			root->child[root->size ++] = brother;
+			root->append(u);
+			root->append(brother);
 			root->level = u->level + 1;
-			u->father = root;
-			brother->father = root;
 		}
 		return ;
 	}
 	
 	RTreeNode<M, D> *father = u->father;
 	if (brother != nullptr) {
-		father->child[father->size ++] = brother;
-		brother.father = father;
+		father->append(brother);
 	}
 	father->box = HyperBound();
 	for (int i = 0; i < father->size; i ++) {
