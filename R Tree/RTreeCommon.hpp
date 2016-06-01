@@ -14,26 +14,32 @@ struct Bound{
 	Bound();
 	Bound(const double &x, const double &y);
 
+	friend Bound operator +(const Bound &a, const Bound &b) {
+		return Bound(std::min(a.lowerBound, b.lowerBound),
+				     std::max(a.upperBound, b.upperBound));
+	}
+
 };
 
 template<size_t M>
 class HyperBound{
-friend double operator +(const HyperBound<M> &a, const HyperBound<M> &b) {
+friend HyperBound<M> operator +(const HyperBound<M> &a, const HyperBound<M> &b) {
 	double tmp = 0.0;
+	HyperBound<M> ret;
 	for (int i = 0; i < M; i++) {
-		Bound lA = a.bounds[i], lB = b.bounds[i];
-		tmp *= (std::max(lA.upperBound, lB.upperBound) - std::min(lA.lowerBound, lB.lowerBound));
+		ret.push_back(a + b);
 	}
 	return tmp;
 }
 private:
-	std::vector<Bound> bounds;
+	Bound bounds[M];
 
 public:
+	HyperBound();
 	HyperBound(const std::vector<Bound> &rhs);
 
 	double area()const;
-	bool isOverLap(const HyperBound<M> &rhs);
+	bool isOverLap(const HyperBound<M> &rhs)const;
 
 };
 
