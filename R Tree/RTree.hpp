@@ -30,10 +30,23 @@ RTreeNode<M, D>* RTree<T, M, D>::splitNode(RTreeNode<M, D>* u) {
 	tmp[1] = new RTreeNode<M, D>(*u);
 	pickSeeds(u, tmp[0], tmp[1]);
 	
-	for (int i = 0; i < u->size; i ++) {
-		
+	while (u->size > 0) {
+		if (tmp[0]->size > tmp[1]->size) {
+			std::swap(tmp[0], tmp[1]);
+		}
+		if (tmp[0]->size + u->size <= m) {
+			for (int i = 0; i < u->size; i ++) {
+				tmp[0]->append(u->child[i]);
+			}
+			break;
+		}
+		pickNext(u, tmp[0], tmp[1]);
 	}
+	(*u) = *tmp[0];
+	return tmp[1];
 }
+
+template<class T, size_t M, size_t D>
 
 template<class T, size_t M, size_t D>
 void RTree<T, M, D>::chooseLeaf(const HyperBound<D> &key, const T &value) {
