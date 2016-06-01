@@ -15,7 +15,7 @@ public:
 	RTree();
 	bool insert(const HyperPoint<M> &rhs);
 	bool remove(const HyperPoint<M> &rhs);
-	std::vector<HyperPoint<M> > getPointSet(const HyperRectangle<M> &rhs);
+	std::vector<HyperPoint<M> > getPointSet(const HyperRectangle<M> &rhs)const;
 
 };
 
