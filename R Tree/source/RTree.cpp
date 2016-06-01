@@ -35,8 +35,19 @@ RTree<T, M, D>::RTree() {
 }
 
 template<class T, size_t M, size_t D>
+RTree<T, M, D>::__clear(HyperNode<T, M, D> *now) {
+	if (level > 0) {
+		for (int i = 0; i < now -> size; i++) {
+			__clear(now -> child[i]);
+		}
+	}
+	delete now;
+	now = root;
+}
+
+template<class T, size_t M, size_t D>
 RTree<T, M, D>::~RTree() {
-	clear();
+	__clear(root);
 }
 
 #endif

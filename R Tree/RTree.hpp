@@ -11,7 +11,9 @@ class RTree{
 private:
 	RTreeNode<M, D> *root;
 
+	void __clear(RTreeNode<M, D> *now);
 	void __find(const RTreeNode<M, D> * const *now, const HyperBound<D> &bound, std::vector<T &> &storge)const;
+	RTreeNode<M, D> __splitNode(RTreeNode<M, D> *now);
 
 public:
 	RTree();

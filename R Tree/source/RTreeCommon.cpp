@@ -29,7 +29,7 @@ double HyperRectangle<M>::area()const {
 }
 
 template<size_t M>
-bool HyperRectangle<M>::isOverLap(const HyperRectangle<M> &rhs) {
+bool HyperRectangle<M>::isOverLap(const HyperRectangle<M> &rhs)const {
 	for (int i = 0; i < M; i++) {
 		Bound a = bounds[i], b = rhs.bounds[i];
 		if (a.lowerBound > b.upperBound || b.lowerBound > a.upperBound) {

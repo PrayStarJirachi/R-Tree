@@ -16,7 +16,7 @@ struct Bound{
 
 	friend Bound operator +(const Bound &a, const Bound &b) {
 		return Bound(std::min(a.lowerBound, b.lowerBound),
-				     std::max(a.upperBOund, b.upperBound));
+				     std::max(a.upperBound, b.upperBound));
 	}
 
 };
@@ -39,7 +39,7 @@ public:
 	HyperBound(const std::vector<Bound> &rhs);
 
 	double area()const;
-	bool isOverLap(const HyperBound<M> &rhs);
+	bool isOverLap(const HyperBound<M> &rhs)const;
 
 };
 

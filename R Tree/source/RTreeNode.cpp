@@ -21,6 +21,24 @@ RTreeNode<M, D>::~RTreeNode() {
 	level = size = 0;
 }
 
+template<size_t M, size_t D>
+void RTreeNode<M, D>::remove(const RTreeNode<M, D> *key) {
+	for (int i = 0; i < size; i++) {
+		if (child[i] == key) {
+			for (int j = i; j < size - 1; j++) {
+				child[j] = child[j + 1];
+			}
+			size--;
+			break;
+		}
+	}
+}
+
+template<size_t M, size_t D>
+void RTreeNode<M, D>::append(const RTreeNode<M, D> *key) {
+	child[size++] = key;
+}
+
 #endif
 
 #endif

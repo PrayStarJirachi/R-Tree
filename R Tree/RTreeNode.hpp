@@ -5,19 +5,17 @@
 
 namespace sjtu{
 
-template<class M, class D>
-class RTree;
-
-template<class M, class D>
-class RTreeNode{
-friend class RTree<M, D>;
-private:
+template<size_t M, size_t D>
+struct RTreeNode{
 	HyperBound<M, D> box;
 	void *child[M + 1], father;
 	size_t level, size;
 
 	RTreeNode();
 	virtual ~RTreeNode();
+
+	void remove(const RTreeNode<M, D> *key);
+	void append(const RTreeNode<M, D> *key);
 
 };
 
