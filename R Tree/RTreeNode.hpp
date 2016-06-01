@@ -1,6 +1,8 @@
 #ifndef SJTU_RTREENODE_HPP
 #define SJTU_RTREENODE_CPP
 
+#include "RTreeCommon.hpp"
+
 namespace sjtu{
 
 template<class M, class D>
@@ -10,10 +12,10 @@ template<class M, class D>
 class RTreeNode{
 friend class RTree<M, D>;
 private:
-	void *child[M + 1];
-	RTreeNode<M, D> *father;
-	HyperRectangle<D> box[M + 1];
-	size_t level;
+	typedef std::pair<HyperBound<D>, void *> Entry;
+
+	Entry child[M + 1];
+	size_t level, size;
 
 };
 
