@@ -6,16 +6,16 @@
 
 namespace sjtu{
 
-template<size_t M, size_t D>
+template<class T, size_t M, size_t D>
 class RTree{
 private:
 	RTreeNode *root;
-	RTreeNode* Find_Leaf(HyperPoint *p, RTreeNode *t);
+	RTreeNode* Find_Leaf(HyperBound<D> &key, RTreeNode *t);
 public:
 	RTree();
-	bool insert(const HyperPoint<M> &rhs);
-	bool remove(const HyperPoint<M> &rhs);
-	std::vector<HyperPoint<M> > getPointSet(const HyperRectangle<M> &rhs);
+	bool insert(const HyperBound<D> &key, const T &value);
+	bool remove(const HyperBound<D> &key);
+	std::vector<HyperPoint<M> > getPointSet(const HyperBound<D> &bound);
 
 };
 
