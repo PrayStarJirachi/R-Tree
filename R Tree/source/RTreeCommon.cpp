@@ -10,17 +10,19 @@ Bound::Bound(const double &lB, const double &rB) : lowerBound(lB), upperBound(rB
 }
 
 template<size_t M>
-HyperRectangle<M>::HyperRectangle(const std::vector<Bound> &rhs) : bounds(rhs) {
+HyperBound<M>::HyperBound() {
+}
+
+template<size_t M>
+HyperBound<M>::HyperBound(const std::vector<Bound> &rhs) {
 	assert(rhs.size() == M);
+	for (int i = 0; i < M; i++) {
+		bounds[i] = rhs[i];
+	}
 }
 
 template<size_t M>
-std::vector<Bound> HyperRectangle<M>::getBounds()const {
-	return bounds;
-}
-
-template<size_t M>
-double HyperRectangle<M>::area()const {
+double HyperBound<M>::area()const {
 	double ret = 1.0;
 	for (auto element : bounds) {
 		ret *= element.upperBound - element.lowerBound;
@@ -29,7 +31,7 @@ double HyperRectangle<M>::area()const {
 }
 
 template<size_t M>
-bool HyperRectangle<M>::isOverLap(const HyperRectangle<M> &rhs)const {
+bool HyperBound<M>::isOverLap(const HyperBound<M> &rhs)const {
 	for (int i = 0; i < M; i++) {
 		Bound a = bounds[i], b = rhs.bounds[i];
 		if (a.lowerBound > b.upperBound || b.lowerBound > a.upperBound) {

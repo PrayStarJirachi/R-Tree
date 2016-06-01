@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include <cfloat>
 
 namespace sjtu{
 
@@ -24,12 +25,11 @@ struct Bound{
 template<size_t M>
 class HyperBound{
 friend HyperBound<M> operator +(const HyperBound<M> &a, const HyperBound<M> &b) {
-	double tmp = 0.0;
 	HyperBound<M> ret;
 	for (int i = 0; i < M; i++) {
-		ret.push_back(a + b);
+		ret.bounds[i] = a.bounds[i] + b.bounds[i];
 	}
-	return tmp;
+	return ret;
 }
 private:
 	Bound bounds[M];
