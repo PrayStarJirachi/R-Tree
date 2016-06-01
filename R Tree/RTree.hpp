@@ -8,9 +8,11 @@ namespace sjtu{
 
 template<class T, size_t M, size_t D>
 class RTree{
+	
 private:
 	RTreeNode *root;
 	RTreeNode* Find_Leaf(HyperBound<D> &key, RTreeNode *t);
+	void CondenseTree(RTreeNode *t, vector<RTreeNode*> &Q);
 public:
 	RTree();
 	bool insert(const HyperBound<D> &key, const T &value);
