@@ -6,7 +6,7 @@
 template<class T, size_t M, size_t D>
 RTreeNode* Find_Leaf_Exist(HyperBound<D> &key, RTreeNode *t)
 {
-	if(t -> level == 0)
+	if(!(t -> level))
 	{
 		pair<HyperBound<D>, T> *X;
 		for(int i = 0; i < t -> size; i++)
@@ -23,12 +23,12 @@ RTreeNode* Find_Leaf_Exist(HyperBound<D> &key, RTreeNode *t)
 		RTreeNode *P;
 		for(int i = 0; i < t -> size; i++)
 		{
-			Y = t -> child[i] -> box;
+			P = static_cast<RTreeNode*>(t -> child[i]);
+			Y = P -> box;
 			if(Y.Inside(key))
 			{
-				P = static_cast<RTreeNode*>(t -> child[i]);
 				RTreeNode *Z;
-				Z = Find_Leaf(p, P);
+				Z = Find_Leaf_Exist(key, P);
 				if(Z != NULL)
 				{
 					return Z;
@@ -88,6 +88,10 @@ void CondenseTree(RTreeNode *t, vector<RTreeNode*> &Q)
 				}
 			}
 		}
+		for(int i = 0; i < len; i++)
+		{
+			delete Q[i];
+		}
 	}
 }
 
@@ -121,7 +125,7 @@ bool remove(const HyperBound<D> &key)
 	if(root -> size == 1)
 	{
 		RTreeNode *U = root;
-		root = root -> child[0];
+		root = static_cast<RTreeNode*>(root -> child[0]);
 		delete U;
 	}
 	
