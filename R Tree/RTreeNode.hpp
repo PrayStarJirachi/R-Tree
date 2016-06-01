@@ -12,9 +12,8 @@ template<class M, class D>
 class RTreeNode{
 friend class RTree<M, D>;
 private:
-	typedef std::pair<HyperBound<D>, void *> Entry;
-
-	Entry child[M + 1];
+	HyperBound<M, D> box;
+	void *child[M + 1];
 	size_t level, size;
 
 };
