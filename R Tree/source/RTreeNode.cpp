@@ -37,6 +37,15 @@ void RTreeNode<M, D>::remove(const RTreeNode<M, D> *key) {
 template<size_t M, size_t D>
 void RTreeNode<M, D>::append(const RTreeNode<M, D> *key) {
 	child[size++] = key;
+	key -> father = this;
+}
+
+template<size_t M, size_t D>
+void update() {
+	box = HyperBound<M, D>();
+	for (int i = 0; i < size; i++) {
+		box = box + child[i] -> box;
+	}
 }
 
 #endif
