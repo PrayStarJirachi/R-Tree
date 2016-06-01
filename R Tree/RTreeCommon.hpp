@@ -17,15 +17,8 @@ struct Bound{
 };
 
 template<size_t M>
-class HyperPoint{
-private:
-	double data[M];
-
-};
-
-template<size_t M>
-class HyperRectangle{
-friend double operator +(const HyperRectangle<M> &a, const HyperRectangle<M> &b) {
+class HyperBound{
+friend double operator +(const HyperBound<M> &a, const HyperBound<M> &b) {
 	double tmp = 0.0;
 	for (int i = 0; i < M; i++) {
 		Bound lA = a.bounds[i], lB = b.bounds[i];
@@ -37,11 +30,10 @@ private:
 	std::vector<Bound> bounds;
 
 public:
-	HyperRectangle(const std::vector<HyperPoint> &rhs);
+	HyperBound(const std::vector<Bound> &rhs);
 
-	std::vector<Bound> getBounds()const;
 	double area()const;
-	bool isOverLap(const HyperRectangle<M> &rhs);
+	bool isOverLap(const HyperBound<M> &rhs);
 
 };
 
