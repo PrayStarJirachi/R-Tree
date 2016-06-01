@@ -13,8 +13,11 @@ class RTreeNode{
 friend class RTree<M, D>;
 private:
 	HyperBound<M, D> box;
-	void *child[M + 1];
+	void *child[M + 1], father;
 	size_t level, size;
+
+	RTreeNode();
+	virtual ~RTreeNode();
 
 };
 

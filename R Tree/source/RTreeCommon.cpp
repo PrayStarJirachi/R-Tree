@@ -3,7 +3,7 @@
 #ifndef SJTU_RTREECOMMON_CPP
 #define SJTU_RTREECOMMON_CPP
 
-Bound::Bound() : lowerBound(0), upperBound(0) {
+Bound::Bound() : lowerBound(DBL_MAX), upperBound(-DBL_MAX) {
 };
 
 Bound::Bound(const double &lB, const double &rB) : lowerBound(lB), upperBound(rB) {

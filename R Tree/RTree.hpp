@@ -15,10 +15,12 @@ private:
 
 public:
 	RTree();
+
 	bool insert(const HyperBound<D> &key, const T &value);
 	bool remove(const HyperBound<D> &key);
 	std::vector<T &> getPointSet(const HyperBound<D> &bound)const;
 
+	virtual ~RTree();
 };
 
 #include "source/RTree.cpp"
