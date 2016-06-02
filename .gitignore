@@ -31,3 +31,15 @@
 main.*
 
 *.swp
+
+# Latex files
+*.toc
+*.jpg
+*.aux
+*.bbl
+*.blg
+*.log
+*.bak
+*.out
+*.pyg
+*.bib
