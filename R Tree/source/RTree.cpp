@@ -43,7 +43,7 @@ void RTree<T, M, D>::__clear(RTreeNode<T, M, D> *now) {
 		}
 	}
 	delete now;
-	now = root;
+	now = NULL;
 }
 
 template<class T, size_t M, size_t D>
@@ -66,13 +66,18 @@ RTreeNode<T, M, D> * RTree<T, M, D>::splitNode(RTreeNode<T, M, D>* u) {
 		}
 		if (tmp[0]->size + u->size <= M) {
 			for (int i = 0; i < u->size; i ++) {
-				tmp[0]->append(static_cast<RTreeNode<T, M, D> *>(u->child[i]));
+				tmp[0]->append(u->child[i], u->level > 0);
 			}
 			break;
 		}
 		pickNext(u, tmp[0], tmp[1]);
 	}
 	(*u) = *tmp[0];
+	if (u -> level > 0) {
+		for (int i = 0; i < u->size; i ++) {
+			static_cast<RTreeNode<T, M, D> *>(u->child[i])->father = u;
+		}
+	}
 	return tmp[1];
 }
 
@@ -82,18 +87,27 @@ void RTree<T, M, D>::pickSeeds(RTreeNode<T, M, D> *u, RTreeNode<T, M, D> *t0, RT
 	double max = -1;
 	for (int i = 0; i < u->size; i ++) {
 		for (int j = i + 1; j < u->size; j ++) {
-			auto pi = static_cast<RTreeNode<T, M, D> *>(u->child[i]);
-			auto pj = static_cast<RTreeNode<T, M, D> *>(u->child[j]);
-			if (std::abs(pi->box.area() - pj->box.area()) > max) {
-				max = std::abs(pi->box.area() - pj->box.area());
-				tmp = std::make_pair(i, j);
+			if (u -> level == 0) {
+				auto pi = static_cast<std::pair<HyperBound<D>, T> *>(u->child[i]);
+				auto pj = static_cast<std::pair<HyperBound<D>, T> *>(u->child[j]);
+				if (std::abs(pi->first.area() - pj->first.area()) > max) {
+					max = std::abs(pi->first.area() - pj->first.area());
+					tmp = std::make_pair(i, j);
+				}
+			} else {
+				auto pi = static_cast<RTreeNode<T, M, D> *>(u->child[i]);
+				auto pj = static_cast<RTreeNode<T, M, D> *>(u->child[j]);
+				if (std::abs(pi->box.area() - pj->box.area()) > max) {
+					max = std::abs(pi->box.area() - pj->box.area());
+					tmp = std::make_pair(i, j);
+				}
 			}
 		}
 	}
-	t0->append(static_cast<RTreeNode<T, M, D> *>(u->child[tmp.first]));
-	t1->append(static_cast<RTreeNode<T, M, D> *>(u->child[tmp.second]));
-	u->remove(static_cast<RTreeNode<T, M, D> *>(u->child[tmp.first]));
-	u->remove(static_cast<RTreeNode<T, M, D> *>(u->child[tmp.second]));
+	t0->append(u->child[tmp.first], u -> level > 0);
+	t1->append(u->child[tmp.second], u -> level > 0);
+	u->remove(u->child[tmp.second]);
+	u->remove(u->child[tmp.first]);
 }
 
 template<class T, size_t M, size_t D>
@@ -105,20 +119,26 @@ void RTree<T, M, D>::pickNext(RTreeNode<T, M, D> *u, RTreeNode<T, M, D> *t0, RTr
 	int max = -1;
 	for (int i = 0; i < u->size; i ++) {
 		double delta[2];
-		auto tmp = static_cast<RTreeNode<T, M, D> *>(u->child[i]);
-		delta[0] = (t0->box + tmp->box).area() - t0->box.area();
-		delta[1] = (t1->box + tmp->box).area() - t1->box.area();
-		if (delta[0] > max) {
+		if (u -> level > 0) {
+			auto tmp = static_cast<RTreeNode<T, M, D> *>(u->child[i]);
+			delta[0] = (t0->box + tmp->box).area() - t0->box.area();
+			delta[1] = (t1->box + tmp->box).area() - t1->box.area();
+		} else {
+			auto tmp = static_cast<std::pair<HyperBound<D>, T> *>(u->child[i]);
+			delta[0] = (t0->box + tmp->first).area() - t0->box.area();
+			delta[1] = (t1->box + tmp->first).area() - t1->box.area();
+		}
+		if (delta[0] > max && t0->size < M) {
 			max = delta[0];
 			best = std::make_pair(i, t0);
 		}
-		if (delta[1] > max) {
+		if (delta[1] > max && t1->size < M) {
 			max = delta[1];
 			best = std::make_pair(i, t1);
 		}
 	}
-	best.second->append(static_cast<RTreeNode<T, M, D> *>(u->child[best.first]));
-	u->remove(static_cast<RTreeNode<T, M, D> *>(u->child[best.first]));
+	best.second->append(u->child[best.first], u->level > 0);
+	u->remove(u->child[best.first]);
 }
 
 template<class T, size_t M, size_t D>
@@ -128,7 +148,7 @@ RTreeNode<T, M, D> * RTree<T, M, D>::chooseLeaf(const HyperBound<D> &key, const 
 		if (u->level == 0) {
 			return u;
 		}
-		RTreeNode<T, M, D> *v;
+		RTreeNode<T, M, D> *v = nullptr;
 		double max = -DBL_MAX;
 		for (int i = 0; i < u->size; i ++) {
 			double s = (static_cast<RTreeNode<T, M, D> *>(u->child[i])->box + key).area();
@@ -149,6 +169,7 @@ void RTree<T, M, D>::adjust(RTreeNode<T, M, D> *u, RTreeNode<T, M, D> *brother) 
 			root->append(u);
 			root->append(brother);
 			root->level = u->level + 1;
+			root->update();
 		}
 		return ;
 	}
@@ -157,12 +178,8 @@ void RTree<T, M, D>::adjust(RTreeNode<T, M, D> *u, RTreeNode<T, M, D> *brother) 
 	if (brother != nullptr) {
 		father->append(brother);
 	}
-	father->box = HyperBound<D>();
-	for (int i = 0; i < father->size; i ++) {
-		father->box = father->box + static_cast<RTreeNode<T, M, D> *>(father->child[i])->box;
-	}
-	
-	RTreeNode<T, M, D> *v;
+	father->update();
+	RTreeNode<T, M, D> *v = nullptr;
 	if (father->size > M) {
 		v = splitNode(father);
 	}
@@ -170,12 +187,13 @@ void RTree<T, M, D>::adjust(RTreeNode<T, M, D> *u, RTreeNode<T, M, D> *brother) 
 }
 
 template<class T, size_t M, size_t D>
-void RTree<T, M, D>::insert(const HyperBound<D> &key, const T &value) {
+void RTree<T, M, D>::insert(const HyperBound<D> &key, const T &value, bool flag) {
 	RTreeNode<T, M, D> *target = chooseLeaf(key, value);
 	
 	target->child[target->size ++] = new std::pair<HyperBound<D>, T>(key, value);
+	target->update();
 	
-	RTreeNode<T, M, D> *v;
+	RTreeNode<T, M, D> *v = nullptr;
 	if (target->size > M) {
 		v = splitNode(target);
 	}
@@ -183,7 +201,7 @@ void RTree<T, M, D>::insert(const HyperBound<D> &key, const T &value) {
 }
 
 template<class T, size_t M, size_t D>
-RTreeNode<T, M, D> * Find_Leaf_Exist(HyperBound<D> &key, RTreeNode<T, M, D> *t)
+RTreeNode<T, M, D> * RTree<T, M, D>::Find_Leaf_Exist(const HyperBound<D> &key, RTreeNode<T, M, D> *t)
 {
 	if(!(t -> level))
 	{
@@ -204,7 +222,7 @@ RTreeNode<T, M, D> * Find_Leaf_Exist(HyperBound<D> &key, RTreeNode<T, M, D> *t)
 		{
 			P = static_cast<RTreeNode<T, M, D> *>(t -> child[i]);
 			Y = P -> box;
-			if(Y.Inside(key))
+			if(key.inside(Y))
 			{
 				RTreeNode<T, M, D> *Z;
 				Z = Find_Leaf_Exist(key, P);
@@ -301,7 +319,7 @@ bool RTree<T, M, D>::remove(const HyperBound<D> &key)
 	std::vector<RTreeNode<T, M, D> *> Q;
 	CondenseTree(P, Q);
 
-	if(root -> size == 1)
+	while (root -> size == 1 && root -> level != 0)
 	{
 		RTreeNode<T, M, D> *U = root;
 		root = static_cast<RTreeNode<T, M, D> *>(root -> child[0]);
